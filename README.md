@@ -357,7 +357,7 @@ done
 
 ## 十三、许可证
 
-[GPL-3.0-only](LICENSE)。
+[GPL-3.0-only](LICENSE)。Copyright (C) 2026 AlanQi1。
 
 选择 GPL-3.0 而不是 MIT，是因为本项目的点位数据与定位算法源自同样以 GPL-3.0 发布的 ZJU-live-better，按该许可证的传染性要求，衍生作品需要以同一许可证发布。
 
