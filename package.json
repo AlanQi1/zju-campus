@@ -1,6 +1,6 @@
 {
   "name": "@local/zju-campus",
-  "version": "1.13.0",
+  "version": "1.13.1",
   "private": true,
   "type": "module",
   "description": "浙江大学校园助手：ZJUAM 统一身份认证、学在浙大待办/作业/课件、智云课堂课表/回放/笔记、校园通知聚合、雷达点名虚拟位置，支持侧边栏独立页面与会话右侧抽屉。",

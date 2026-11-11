@@ -1,5 +1,16 @@
 # 更新记录
 
+## 1.13.1
+
+- **老师把签到码写在黑板上也能认了**。智云没有单独的板书接口（`search-board` / `blackboard` 之类全是 404，课件时间轴里 `detecttype` 只有 `ppt`），但直播流本身是**整间教室的全景摄像头**——黑板就在画面左侧，所以要认板书只能从直播视频里抓帧：
+  - `src/cmc.js` 新增 `liveStream(courseId, subId)`：读 `courseapi/v2/course/catalogue?course_id=`，挑 `status === '1'`（直播中）那一节，返回带 `auth_key` 的 HLS 地址 `livepgc.cmc.zju.edu.cn/pgc/<hash>.m3u8`、教室号、教师、`api_pass`。
+  - 新增 `scripts/grab-frame.py`：用 cv2 打开 m3u8，先把 `--drain` 秒的缓冲帧丢掉取「现在」的画面，再按 `--mode board|slide` 裁出黑板区 / 投影区后 2× 放大输出 PNG。`--enhance` 会额外出一张「反相 → CLAHE(3.0) → 锐化」的增强图，深色黑板上的白粉笔字靠它补漏。写图走 `cv2.imencode` + `open(...,'wb')`——中文路径下 `cv2.imwrite` 会静默失败。
+  - `src/rollcall-number-source.js` 新增 `readLiveBlocks()`：黑板区、投影区各抓一帧，原图 OCR 后再拿增强图补一遍（只补不覆盖），并把抓到的 PNG 留在磁盘上给面板显示。`gather` 里与转录、课件三路并行。
+  - `src/rollcall-number.js`：候选来源白名单加 `live`，计分 `+3`（摄像头画面最贴近现场，比课件和口播都可靠）；`findCodes` 新增 `SPACED_CODE_RE`，黑板上常写的 `4 7 2 9`、`4-7-2-9`、`47 29` 现在都能归一化成 `4729`（原来一个都抓不到），长数字串仍不会被拆开。
+  - 侧边栏在识别结果下面显示「智云直播画面 · 教室 X 黑板 / 投影（点开看大图）」，图片走 `GET /dsh-zju/rollcall-number?rollcall_id=&frame=board|slide`，认不出数字时用户自己扫一眼黑板即可。
+  - 新配置键：`rollcallNumberLive`（默认 `true`，关掉就不再抓直播画面）。
+  - `test/rollcall-number.mjs` 从 9 组扩到 12 组（分开写的数字、带分隔符、长数字串不误判）。
+
 ## 1.13.0
 
 - **数字点名可以自动找签到码了**。以前遇到数字点名只能去校内 App 手填，现在插件会自己去智云课堂翻材料：
