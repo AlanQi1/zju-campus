@@ -1,0 +1,49 @@
+# 依赖
+node_modules/
+jspm_packages/
+.pnpm-debug.log*
+package-lock.json.bak
+
+# 凭据与本地账号（绝对不要提交）
+.env
+.env.local
+.env.*.local
+*.env
+!test/fixture.env
+credentials.env
+independent-accounts.env
+*.credentials
+
+# 本机运行时状态
+.cache/
+.backup/
+.tmp/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 真实数据快照（含学号、课表、成绩、笔记正文）
+preview/summary.json
+notes/
+state/
+
+# OCR / 下载产物
+__pycache__/
+*.pyc
+*.pyo
+ocr-out/
+*.ocr.json
+
+# 调研残留（第三方页面抓取 + 一次性探针脚本，不是插件的一部分）
+research/
+
+# 日志与诊断
+*.log
+logs/
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*~

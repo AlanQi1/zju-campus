@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import { parseEngineeringHomework, parseEngineeringDeadline } from '../src/engineering.js';
+const base = 'http://10.71.32.157/student/TestList.aspx?type=1';
+const html = `<table><tr><td>Layout<table><tr><th>编号</th><th>课前预习名称</th><th>工种</th><th>有效终止日期</th><th>参加考试</th></tr><tr><td>1</td><td>Test preparation</td><td>Practical</td><td>2026-11-01 12:35</td><td><a href="javascript:showConfirmTest(1)">参加考试</a></td></tr></table></td></tr></table>`;
+const result = parseEngineeringHomework(html, base);
+assert.equal(result.structureKnown,true);
+assert.equal(result.items.length,1);
+assert.equal(result.items[0].title,'Test preparation');
+assert.match(result.items[0].deadline,/2026-11-01T12:35/);
+assert(!result.items[0].url || !result.items[0].url.includes('showConfirmTest'));
+assert.equal(parseEngineeringDeadline('2026-11-01'),'2026-11-01');
+assert.equal(parseEngineeringDeadline('2026-02-30'),null);
+const empty = parseEngineeringHomework('<table><tr><th>报告名称</th><th>有效终止日期</th></tr></table>',base);
+assert.equal(empty.structureKnown,true);
+assert.equal(empty.items.length,0);
+assert.equal(parseEngineeringHomework('<div>Nothing structured</div>',base).structureKnown,false);
+console.log('PASS engineering nested tables, preparation record, minute deadline, confirmed-empty report and no-start-test link');

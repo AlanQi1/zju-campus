@@ -1,0 +1,57 @@
+{
+  "name": "@local/zju-campus",
+  "version": "1.13.0",
+  "private": true,
+  "type": "module",
+  "description": "浙江大学校园助手：ZJUAM 统一身份认证、学在浙大待办/作业/课件、智云课堂课表/回放/笔记、校园通知聚合、雷达点名虚拟位置，支持侧边栏独立页面与会话右侧抽屉。",
+  "license": "GPL-3.0-only",
+  "author": "AlanQi1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlanQi1/zju-campus.git"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "zju",
+    "zjuam",
+    "courses",
+    "classroom",
+    "rollcall"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": {
+      "default": "./client.js"
+    },
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "src/**/*.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "scripts/slides-ocr.py",
+    "README.md",
+    "CHANGELOG.md",
+    "INSTALL.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar-right"
+      ],
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}

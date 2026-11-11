@@ -1,0 +1,20 @@
+# 浙大校园助手：把 ZJUAM 认证、学在浙大、智云课堂与校园通知接入 DSH。
+# 账号密码不要写在这里。首次安装会自动生成
+#   $DSH_HOME/zju-campus/credentials.env
+# 填 ZJU_USER / ZJU_PASSWORD 两行即可，保存后无需重启。
+- insert:
+    - id: zju-campus
+      name: '@local/zju-campus'
+      config:
+        # 需要让模型代提交/撤回作业时，再把 allowWriteOps 改成 true
+        allowWriteOps: false
+        # 用虚拟位置应答雷达点名（真实签到写操作）。确认要使用时再改成 true
+        allowRollcallSign: false
+        # 独立校园HTTP系统（大物实验、工程训练）授权
+        allowIndependentHttp: true
+        # 工程训练已按要求接入：只记录课前预习/作业习题的截止时间，并给答题入口
+        enableEngineering: true
+        sessionTtlMinutes: 15
+        # 大物实验课件下载根目录。留空则落到 <用户目录>/ZJU/大物实验；
+        # 想指定位置就改成自己的路径，例如 D:/LabCourseware/大物实验。
+        labMaterialsRoot: ''
