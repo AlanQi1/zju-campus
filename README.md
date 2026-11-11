@@ -12,7 +12,7 @@ DSH Host 插件：把 ZJUAM 统一身份认证、学在浙大、智云课堂和�
 
 <sub>截图由 `node test/preview-render.mjs --demo` 用示例数据生成，学号、课程、教师、教室、路径均为占位值。</sub>
 
-| 会话右侧抽屉（紧凑版） | 签到区特写 |
+| 会话右侧抽屉（紧凑版） |
 |---|---|
 | ![抽屉](preview/rollcall-active.png) | ![签到区](preview/cmc-focus.png) |
 
@@ -54,8 +54,7 @@ plugin_manager install_bundle target = <解压后的插件目录绝对路径>
    - 安装后左侧边栏多出「浙大」图标入口，点开为大页面板。
    - **待办**：支持全部与紧迫筛选，临近截止标红，带一键「💬 问 AI」按钮。
    - **近 7 天课表**：日期条覆盖今天与往前 6 天，点日期即可切换；每节课都能直接「转录 / 笔记」，非今日课程也能回看复习。**点击课程直接打开智云课堂对应课堂**（统一走 `/livingroom`）。
-   - **签到提醒**：面板顶部红色「正在进行签到」横幅，并显示当前默认虚拟位置。**默认只提醒，不代签**；配置 `allowRollcallSign` 后可用虚拟位置应答雷达点名。签到区右上角有常驻的红色「一键签到」，下方还有「自动签到」开关：插件进程内每 60 秒查一次，检测到进行中的雷达点名就直接签（每个点名最多试 2 次，失败隔 3 分钟再试），旁边的「立刻检查」可以不让等定时器。
-   - **数字点名**：遇到「数字点名」时，签到区会多出一块「数字点名 · 签到码」——自动去智云课堂读这节课的语音转录、最新课件截图，以及**直播摄像头画面**（老师把数字写在黑板上也能看），从里面找出要填的 4 位数字，直接把结果和置信度写在面板上，旁边给一个输入框可以手工改、手工提交。**猜不出来就明说「无法判断，请打开智云课堂自行确认」**，绝不瞎填；平台在 `number_code` 字段里直接给了答案时优先用它。抓到的黑板/投影画面会缩小显示在结果下面，点开看大图，自己也能扫一眼。
+   - **签到提醒**：面板顶部红色「正在进行签到」横幅，并显示当前默认虚拟位置。**默认只提醒，不代签**；
    - **最新通知**：求是学院、本科生院、外国语学院、光电学院聚合。
    - **作业入口**：截止时间显示为北京时间；点击直接打开作业详情。
    - **独立校园系统**：大物实验课表、工程训练预习作业截止时间与答题入口。
@@ -88,8 +87,8 @@ plugin_manager install_bundle target = <解压后的插件目录绝对路径>
 | `zju_notices` | 外国语学院 / 光电学院 / 求是学院 / 本科生院公开通知 | 否 |
 | `zju_notice_detail` | 通知正文、发布时间、附件链接 | 否 |
 | `zju_rollcall` | 查看当前有没有正在进行的点名/签到（默认只提醒，不代签） | 是 |
-| `zju_rollcall_location` | 管理雷达点名的虚拟位置点位库：12 个内置点位 + 自定义点位，支持增删改查、设默认、导入导出 | 否 |
-| `zju_rollcall_answer` | 用虚拟位置应答雷达点名（写操作，需 `allowRollcallSign` + `confirm: true`；可 `dry_run` 演练） | 是 |
+| `zju_rollcall_location` | 
+| `zju_rollcall_answer` | 
 | `zju_lab_materials` | 大物实验课件：列出某次实验的指导书/讲义/PPT，或下载到本地并返回路径 | 独立实验账号 |
 | `zju_submit_homework` | 提交作业（写操作，需 `confirm: true`） | 是 |
 | `zju_retract_homework` | 撤回作业（写操作，需 `confirm: true`） | 是 |
@@ -106,50 +105,9 @@ zju_notes_list / zju_obsidian（管理已缓存笔记与同步）
 zju_notices → zju_notice_detail（看通知）
 ```
 
-## 五、虚拟位置（雷达点名）
+## 五、
 
-雷达点名要求提交 GPS 坐标，服务端以教学楼信标点为圆心校验 **500 米** 半径。插件内置了参考项目 [ZJU-live-better](https://github.com/5dbwat4/ZJU-live-better) `courses.zju/autosign.js` 里的 12 个常用点位（紫金港东一 / 西教 / 段永平、玉泉教一 / 四 / 七、之江、华家池等），也可以自己添加。
-
-点位库默认存在 `$DSH_HOME/zju-campus/rollcall-locations.json`，文件里只保存自定义点；预设点由代码内置，不占文件。同名自定义点会覆盖预设点，便于修正坐标。
-
-直接对 AI 说即可：
-
-```text
-列出签到地点
-添加签到地点：东一教学楼 120.089136,30.302331，校区紫金港
-把默认签到地点设为东一教学楼
-用东一教学楼代签这次雷达点名（先 dry_run 看看会试哪些点）
-```
-
-对应工具：
-
-- `zju_rollcall_location`：`list` / `add` / `update` / `remove` / `default` / `resolve` / `import` / `export`。
-  坐标格式统一为「经度,纬度」；如果第二个数大于 90，会自动按「纬度,经度」纠正。
-- `zju_rollcall_answer`：默认策略 `fallback`，顺序是「指定点位 → 默认点位 → 点位库全部点位 → 三点定位」。
-  每次失败会记录服务端返回的 `distance`，凑够 3 个点后用球面最小二乘反推信标位置再试一次。
-  `strategy=single` 只试指定/默认点位，适合已经确定坐标的情况。
-
-**开关**：代签是真实写操作，默认关闭。两种打开方式：
-
-1. 面板「签到」区底部的「虚拟位置代签」开关，点一下即时开/关；状态保存在 `$DSH_HOME/zju-campus/rollcall-switch.json`，优先于配置。
-2. 在 profile 补丁的 `zju-campus` 行里打开（作为没有面板覆盖时的默认值）：
-
-```yaml
-- id: zju-campus
-  name: '@local/zju-campus'
-  config:
-    allowWriteOps: false
-    allowRollcallSign: true
-    allowIndependentHttp: true
-    enableEngineering: true
-    sessionTtlMinutes: 15
-```
-
-> 注意：profile 补丁里的 `config` 是**整体替换**而不是逐键合并，覆盖 `zju-campus` 时要把原有键一并写上，否则 `allowIndependentHttp` / `enableEngineering` 会掉回默认值。
-
-调用时还必须带 `confirm: true`；想先看会尝试哪些点，用 `dry_run: true`（只查询点名列表，不发送签到请求）。
-
-> 说明：这个能力复刻自开源项目 ZJU-live-better 的虚拟位置思路，仅供学习与个人使用。签到规则由学校制定，使用前请自行确认合规性，风险自负。
+仅供学习与个人使用。签到规则由学校制定，使用前请自行确认合规性，风险自负。
 
 ## 六、课堂笔记与 Obsidian
 
@@ -218,21 +176,21 @@ zju_notices → zju_notice_detail（看通知）
 | `tenantId` | `"112"` | 智云课堂租户 id |
 | `username` / `password` | 空 | 不推荐，优先用 `.env` |
 | `envFile` | `$DSH_HOME/zju-campus/credentials.env` | 自定义凭据文件路径 |
-| `allowRollcallSign` | `false` | 是否允许用虚拟位置应答雷达点名（真实签到写操作） |
-| `rollcallLocationsFile` | `$DSH_HOME/zju-campus/rollcall-locations.json` | 虚拟位置库文件路径 |
-| `rollcallSwitchFile` | `$DSH_HOME/zju-campus/rollcall-switch.json` | 面板代签开关的状态文件 |
-| `rollcallAuto` | `true` | 自动签到守护的默认状态（面板开关可覆盖） |
-| `rollcallAutoIntervalMs` | `60000` | 自动签到检查间隔（15 秒 ~ 10 分钟） |
-| `rollcallAutoMaxTries` | `2` | 同一次点名最多自动尝试几次（1 ~ 5） |
-| `rollcallAutoRetryMs` | `180000` | 失败后隔多久再试（0 ~ 1 小时） |
-| `rollcallAutoFile` | `$DSH_HOME/zju-campus/rollcall-auto.json` | 自动签到开关的状态文件 |
-| `rollcallNumber` | `true` | 数字点名时是否去课堂材料里猜签到码（关掉就不 OCR） |
-| `rollcallNumberTtlMs` | `90000` | 识别结果缓存多久（15 秒 ~ 10 分钟），避免刷新面板反复 OCR |
-| `rollcallNumberLive` | `true` | 数字点名时是否抓智云直播画面（黑板 + 投影）一起 OCR |
-| `rollcallDefaultLocation` | 空 | 覆盖默认点位（名称或 id） |
-| `rollcallAccuracy` | `68` | 提交给服务端的 `accuracy` 字段 |
-| `rollcallMaxAttempts` | `20` | 单次点名最多尝试多少个点位（上限 40） |
-| `rollcallAttemptDelayMs` | `800` | 两次尝试之间的间隔（毫秒） |
+| `allowRollcallSign` | `false` |  |
+| `rollcallLocationsFile` | `$DSH_HOME/zju-campus/rollcall-locations.json` |  |
+| `rollcallSwitchFile` | `$DSH_HOME/zju-campus/rollcall-switch.json` |  |
+| `rollcallAuto` | `true` | |
+| `rollcallAutoIntervalMs` | `60000` |  |
+| `rollcallAutoMaxTries` | `2` |  |
+| `rollcallAutoRetryMs` | `180000` |  |
+| `rollcallAutoFile` | `$DSH_HOME/zju-campus/rollcall-auto.json` |  |
+| `rollcallNumber` | `true` |  |
+| `rollcallNumberTtlMs` | `90000` | |
+| `rollcallNumberLive` | `true` | |
+| `rollcallDefaultLocation` | 空 |  |
+| `rollcallAccuracy` | `68` |  |
+| `rollcallMaxAttempts` | `20` |  |
+| `rollcallAttemptDelayMs` | `800` |  |
 | `notesDir` | `$DSH_HOME/zju-campus/notes` | 课堂笔记缓存目录 |
 | `notesDownloadSlides` | `true` | 保存笔记时是否下载课件图片 |
 | `obsidianFile` | `$DSH_HOME/zju-campus/obsidian.json` | Obsidian 同步设置文件（工具/对话写入，优先于配置） |
@@ -264,9 +222,9 @@ zju-campus/
 │   ├── notices.js     # 公开通知抓取
 │   ├── session.js     # 凭据解析、会话缓存、重试
 │   ├── panel.js       # 侧边栏快照聚合与 60 秒缓存
-│   ├── rollcall-locations.js  # 虚拟位置库：预设点、持久化、模糊匹配
-│   ├── rollcall-answer.js     # 雷达点名应答与三点定位
-│   ├── rollcall-switch.js     # 面板代签开关（运行时覆盖配置）
+│   ├── rollcall-locations.js  # 
+│   ├── rollcall-answer.js     # 
+│   ├── rollcall-switch.js     # 
 │   ├── notes.js       # 课堂笔记缓存与 Obsidian 镜像
 │   └── format.js      # 工具结果文本渲染
 ├── locale/{zh,en}.json
@@ -295,10 +253,10 @@ node test/plugin.mjs         # 工具注册、schema、写操作开关
 node test/client.mjs         # 模拟浏览器加载 client.js，检查插槽注册
 node test/panel-mock.mjs     # 不联网验证侧边栏数据映射
 node test/route.mjs          # 路由注册 + 假 req/res 实调
-node test/rollcall-locations.mjs # 虚拟位置库：坐标解析、CRUD、持久化、导入导出
-node test/rollcall-answer.mjs    # 三点定位、应答策略、演练与边界
-node test/rollcall-switch.mjs    # 面板代签开关：配置回退、覆盖、持久化、坏文件
-node test/rollcall-tools.mjs     # 虚拟位置工具端到端（本地临时文件）
+node test/rollcall-locations.mjs # 
+node test/rollcall-answer.mjs    # 
+node test/rollcall-switch.mjs    # 
+node test/rollcall-tools.mjs     # 
 node test/notes.mjs          # 笔记缓存 + Obsidian 镜像（临时目录）
 node test/ppt.mjs            # 课件解析、转录分桶、笔记/材料渲染
 node scripts/slides-ocr.py <课件目录>   # 批量 OCR 课件截图（需 rapidocr-onnxruntime）
@@ -328,8 +286,6 @@ node test/debug-cmc.mjs      # 打印智云课堂登录每一跳，排查重定�
 - 智云课堂只有「回放」状态的课才有转录。
 - 若学校改了登录页结构（`execution` / 表单 action）或接口路径，需要相应调整。
 - 验证码、二次验证会表现为「停在登录页」，本插件不会尝试绕过。
-- 雷达点名的有效半径是 500 米；点位坐标要落在上课教室所在信标的 500 米内。
-- 三点定位依赖服务端在失败响应里返回 `distance`；如果学校改掉了这个字段，只能靠点位库覆盖。
 - 求是学院通知（`qsxy`）只对校内 IP 开放，校外网络下拉不到列表，会返回空结果而不是报错。
 
 ## 十一、参与开发
@@ -350,16 +306,14 @@ done
 
 这个插件的几个关键思路来自下面这些开源项目，感谢作者把它们公开出来：
 
-- **[ZJU-live-better](https://github.com/5dbwat4/ZJU-live-better)**（GPL-3.0-only）— 雷达点名的 12 个信标点位、三点定位反推思路、智云课堂转录与课件合成笔记的流程，都源自这个项目。本项目的虚拟位置库、`rollcall-answer` 的球面近似定位、以及笔记分桶结构是在它的基础上重写的。
+- **[ZJU-live-better](https://github.com/5dbwat4/ZJU-live-better)**（GPL-3.0-only）
 - **[login-zju](https://github.com/5dbwat4/login-zju)** — ZJUAM 的 CAS 流程与 RSA 公钥加密细节的参考实现。
 
-本项目的 `src/rollcall-locations.js` 预设点位坐标直接沿用了 ZJU-live-better 的 `RadarInfo` 常量；`src/rollcall-answer.js` 的注释里也标注了对应关系。除此之外的代码为独立实现，未复制上述项目的源码。
 
 ## 十三、许可证
 
-[GPL-3.0-only](LICENSE)。Copyright (C) 2026 AlanQi1。
+[GPL-3.0-only](LICENSE)
 
-选择 GPL-3.0 而不是 MIT，是因为本项目的点位数据与定位算法源自同样以 GPL-3.0 发布的 ZJU-live-better，按该许可证的传染性要求，衍生作品需要以同一许可证发布。
 
 ## 十四、免责声明
 
